@@ -1,7 +1,7 @@
 let previousTimestamp = null;
 let paused = false;
 
-const jizzhoes = [];
+const jizzhoes = new Set();
 
 const scheduleNextFrame = () =>
   requestAnimationFrame((timestamp) => {
@@ -51,7 +51,7 @@ export function jizzho() {
     a: (Math.random() - 0.5) * 90,
     vA: (Math.random() - 0.5) * 1000,
   };
-  jizzhoes.push(jizzho);
+  jizzhoes.add(jizzho);
 
   updateJizzho(jizzho, 0);
 }
@@ -67,4 +67,34 @@ function updateJizzho(jizzho, timeElapsed) {
   jizzho.img.style.left = jizzho.x - 40 + "px";
   jizzho.img.style.top = jizzho.y - 40 + "px";
   jizzho.img.style.transform = `rotate(${jizzho.a}deg) scale(${jizzho.scale}, ${jizzho.scale})`;
+
+  // GC jizzho if occluded
+  if (jizzhoOccluded(jizzho.img)) {
+    jizzho.img.remove();
+    jizzhoes.delete(jizzho);
+  }
+}
+
+/**
+ * Returns `true` if jizzho is out of viewport.
+ *
+ * Adapted from: https://stackoverflow.com/a/125106/4773291
+ */
+function jizzhoOccluded(el) {
+  var top = el.offsetTop;
+  var left = el.offsetLeft;
+  var width = el.offsetWidth;
+  var height = el.offsetHeight;
+
+  while (el.offsetParent) {
+    el = el.offsetParent;
+    top += el.offsetTop;
+    left += el.offsetLeft;
+  }
+
+  // Add 1000 because `offset*` doesn't account for scale transforms.
+  return !(
+    top + height <= window.pageYOffset + window.innerHeight + 1000 &&
+    left + width <= window.pageXOffset + window.innerWidth + 1000
+  );
 }
