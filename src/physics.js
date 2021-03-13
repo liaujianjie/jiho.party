@@ -35,6 +35,8 @@ export function jizzho() {
   img.style.height = "80px";
   img.style.position = "absolute";
   img.style.pointerEvents = "none";
+  img.style.left = "0px";
+  img.style.top = "0px";
 
   const appContainer = document.getElementById("App");
   appContainer.append(img);
@@ -64,9 +66,11 @@ function updateJizzho(jizzho, timeElapsed) {
 
   jizzho.a = jizzho.a + jizzho.vA * timeElapsed;
 
-  jizzho.img.style.left = jizzho.x - 40 + "px";
-  jizzho.img.style.top = jizzho.y - 40 + "px";
-  jizzho.img.style.transform = `rotate(${jizzho.a}deg) scale(${jizzho.scale}, ${jizzho.scale})`;
+  jizzho.img.style.transform = [
+    `translate(${jizzho.x - 40}px, ${jizzho.y - 40}px)`,
+    `rotate(${jizzho.a}deg)`,
+    `scale(${jizzho.scale}, ${jizzho.scale})`,
+  ].join(" ");
 
   // GC jizzho if occluded
   if (jizzhoOccluded(jizzho.img)) {
