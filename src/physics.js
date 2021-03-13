@@ -5,7 +5,7 @@ const jizzhoes = new Set();
 
 const scheduleNextFrame = () =>
   requestAnimationFrame((timestamp) => {
-    const timeElapsed = (timestamp - previousTimestamp) / 1000; // seconds
+    const timeElapsed = (timestamp - previousTimestamp ?? timestamp) / 1000; // seconds
     previousTimestamp = timestamp;
 
     // update jizzhoes
@@ -73,7 +73,7 @@ function updateJizzho(jizzho, timeElapsed) {
   ].join(" ");
 
   // GC jizzho if occluded
-  if (jizzhoOccluded(jizzho.img)) {
+  if (jizzhoDroppedOutside(jizzho.img)) {
     jizzho.img.remove();
     jizzhoes.delete(jizzho);
   }
@@ -81,24 +81,13 @@ function updateJizzho(jizzho, timeElapsed) {
 
 /**
  * Returns `true` if jizzho is out of viewport.
- *
- * Adapted from: https://stackoverflow.com/a/125106/4773291
  */
-function jizzhoOccluded(el) {
-  var top = el.offsetTop;
-  var left = el.offsetLeft;
-  var width = el.offsetWidth;
-  var height = el.offsetHeight;
-
-  while (el.offsetParent) {
-    el = el.offsetParent;
-    top += el.offsetTop;
-    left += el.offsetLeft;
-  }
+function jizzhoDroppedOutside(img) {
+  const rect = img.getBoundingClientRect();
 
   // Add 1000 because `offset*` doesn't account for scale transforms.
   return !(
-    top + height <= window.pageYOffset + window.innerHeight + 1000 &&
-    left + width <= window.pageXOffset + window.innerWidth + 1000
+    rect.bottom <=
+    (window.innerHeight || document.documentElement.clientHeight) + 1000
   );
 }
